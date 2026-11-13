@@ -1,0 +1,297 @@
+<!DOCTYPE html>
+<html lang="tr">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>ASCII Video // Minimalist Web Tabanlı Animasyon Dönüştürücü</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@300;400;500;600&family=Inter:wght@400;500;600&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="style.css">
+</head>
+<body>
+  <div class="app-container">
+    <!-- SADE VE ZARİF ÜST BAŞLIK -->
+    <header class="app-header">
+      <div class="header-brand">
+        <span class="brand-symbol">◌</span>
+        <div class="brand-text">
+          <h1 class="brand-title">ascii.video</h1>
+          <p class="brand-subtitle">Minimalist Gerçek Zamanlı Video Dönüştürücü</p>
+        </div>
+      </div>
+      <div class="header-badges">
+        <span class="badge">Tarayıcı İçi İşleme</span>
+        <span class="badge" id="fpsBadge">FPS: --</span>
+      </div>
+    </header>
+
+    <!-- ANA GÖVDE -->
+    <main class="main-layout">
+      <!-- SOL PANEL: KONTROLLER VE AYARLAR -->
+      <aside class="control-panel card">
+        <!-- 1. VİDEO KAYNAĞI -->
+        <section class="section-group">
+          <div class="group-title">
+            <span class="group-num">01</span>
+            <span>Video Kaynağı</span>
+          </div>
+
+          <!-- Yükleme Alanı -->
+          <div class="drop-zone" id="dropZone">
+            <input type="file" id="videoInput" accept="video/*" hidden>
+            <div class="drop-content">
+              <svg class="drop-icon" width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round">
+                <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path>
+                <polyline points="17 8 12 3 7 8"></polyline>
+                <line x1="12" y1="3" x2="12" y2="15"></line>
+              </svg>
+              <p class="drop-title">Video dosyasını buraya bırakın</p>
+              <p class="drop-subtitle">veya seçmek için tıklayın</p>
+              <span class="drop-formats">MP4, WebM, MOV</span>
+            </div>
+          </div>
+
+          <!-- Hızlı Eylemler -->
+          <div class="quick-actions">
+            <button class="btn btn-secondary" id="sampleBtn" title="Dahili demo animasyonu başlat">
+              Örnek Demo
+            </button>
+            <button class="btn btn-secondary" id="webcamBtn" title="Kamera görüntüsünü dönüştür">
+              Kamera Aç
+            </button>
+          </div>
+        </section>
+
+        <!-- 2. AYARLAR -->
+        <section class="section-group">
+          <div class="group-title">
+            <span class="group-num">02</span>
+            <span>Görünüm &amp; Karakter Ayarları</span>
+          </div>
+
+          <div class="settings-list">
+            <!-- Karakter Seti -->
+            <div class="setting-item">
+              <label for="charPreset">Karakter Seti</label>
+              <select id="charPreset" class="custom-select">
+                <option value="detailed" selected>Ayrıntılı (Yoğun Karakter)</option>
+                <option value="standard">Standart ( .:-=+*#%@)</option>
+                <option value="blocks">Blok Gölgeli ( ░▒▓█)</option>
+                <option value="minimal">Minimalist ( .·oO@)</option>
+                <option value="binary">İkili Kod ( 01)</option>
+                <option value="dots">Nokta Deseni ( ·:•*)</option>
+                <option value="custom">Özel Tanımlı...</option>
+              </select>
+            </div>
+
+            <!-- Özel Karakter Dizisi (Gizli/Görünür) -->
+            <div class="setting-item" id="customCharRow" style="display: none;">
+              <label for="customChars">Özel Karakterler (Açıktan Koyuya)</label>
+              <input type="text" id="customChars" class="custom-input" value=" .:-=+*#%@">
+            </div>
+
+            <!-- Renk Paleti -->
+            <div class="setting-item">
+              <label for="colorTheme">Renk Şeması</label>
+              <select id="colorTheme" class="custom-select">
+                <option value="mono" selected>Klasik Siyah &amp; Beyaz</option>
+                <option value="silver">Yumuşak Gümüş Gri</option>
+                <option value="darkcharcoal">Koyu Kömür Tonu</option>
+                <option value="color">Gerçek Piksel Rengi (RGB)</option>
+                <option value="inverted">Ters Mod (Beyaz Arka Plan)</option>
+              </select>
+            </div>
+
+            <!-- Karakter Çözünürlüğü (Sütun Sayısı) -->
+            <div class="setting-item">
+              <div class="setting-header">
+                <label for="resSlider">Çözünürlük (Karakter Sayısı)</label>
+                <span class="setting-val" id="resVal">120 sütun</span>
+              </div>
+              <input type="range" id="resSlider" min="40" max="220" step="5" value="120">
+            </div>
+
+            <!-- Kontrast -->
+            <div class="setting-item">
+              <div class="setting-header">
+                <label for="contrastSlider">Kontrast</label>
+                <span class="setting-val" id="contrastVal">1.2x</span>
+              </div>
+              <input type="range" id="contrastSlider" min="0.5" max="3.0" step="0.1" value="1.2">
+            </div>
+
+            <!-- Parlaklık -->
+            <div class="setting-item">
+              <div class="setting-header">
+                <label for="brightnessSlider">Parlaklık</label>
+                <span class="setting-val" id="brightnessVal">1.0x</span>
+              </div>
+              <input type="range" id="brightnessSlider" min="0.3" max="2.5" step="0.05" value="1.0">
+            </div>
+
+            <!-- En/Boy Orantı Düzeltme -->
+            <div class="setting-item">
+              <div class="setting-header">
+                <label for="aspectSlider" title="Monospace yazı tiplerinin basıklığını düzeltir">Karakter En/Boy Dengesi</label>
+                <span class="setting-val" id="aspectVal">0.55</span>
+              </div>
+              <input type="range" id="aspectSlider" min="0.35" max="0.80" step="0.01" value="0.55">
+            </div>
+
+            <!-- Efekt Seçenekleri -->
+            <div class="checkbox-group">
+              <label class="custom-checkbox">
+                <input type="checkbox" id="invertCheck">
+                <span class="checkbox-indicator"></span>
+                <span>Negatife Çevir (Invert)</span>
+              </label>
+              <label class="custom-checkbox">
+                <input type="checkbox" id="edgeCheck">
+                <span class="checkbox-indicator"></span>
+                <span>Kenar Çizgilerini Vurgula (Sobel)</span>
+              </label>
+            </div>
+          </div>
+        </section>
+
+        <!-- 3. DIŞA AKTAR -->
+        <section class="section-group">
+          <div class="group-title">
+            <span class="group-num">03</span>
+            <span>Dışa Aktar</span>
+          </div>
+
+          <div class="export-actions">
+            <button class="btn btn-primary btn-record" id="recordBtn">
+              <span class="record-dot"></span>
+              <span id="recordText">ASCII Video Kaydet (WebM)</span>
+            </button>
+            <div class="sub-export-row">
+              <button class="btn btn-secondary btn-sm" id="snapFrameBtn">
+                Kareyi Metin Kopyala
+              </button>
+              <button class="btn btn-secondary btn-sm" id="snapPngBtn">
+                Resim İndir (PNG)
+              </button>
+            </div>
+          </div>
+        </section>
+      </aside>
+
+      <!-- SAĞ PANEL: ASCII SAHNESİ VE OYNATICI -->
+      <section class="viewer-section card">
+        <!-- Üst Bilgi ve Mod Butonları -->
+        <div class="viewer-header">
+          <div class="file-status">
+            <span class="status-indicator"></span>
+            <span id="fileNameDisplay">Video bekleniyor...</span>
+          </div>
+          <div class="viewer-actions">
+            <div class="mode-tabs">
+              <button class="tab-btn active" id="tabCanvas">Canvas</button>
+              <button class="tab-btn" id="tabText">Saf Metin</button>
+            </div>
+            <button class="btn-tool" id="pipToggle" title="Orijinal Videoyu Göster / Gizle">
+              <span id="pipLabel">Orijinal: Açık</span>
+            </button>
+            <button class="btn-tool" id="fullscreenBtn" title="Tam Ekran">
+              <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                <path d="M8 3H5a2 2 0 0 0-2 2v3m18 0V5a2 2 0 0 0-2-2h-3m0 18h3a2 2 0 0 0 2-2v-3M3 16v3a2 2 0 0 0 2 2h3"></path>
+              </svg>
+            </button>
+          </div>
+        </div>
+
+        <!-- ASCII Sahne Görüntüleyici -->
+        <div class="ascii-viewport" id="viewportWrapper">
+          <!-- Karşılama Kartı -->
+          <div class="welcome-box" id="welcomeOverlay">
+            <div class="welcome-icon">◌</div>
+            <h2 class="welcome-title">ASCII Video Dönüştürücü</h2>
+            <p class="welcome-desc">
+              Başlamak için sol panelden bir video yükleyin veya örnek demoyu çalıştırın.
+            </p>
+            <button class="btn btn-primary" id="welcomeStartDemo">
+              Örnek Demoyu Başlat
+            </button>
+          </div>
+
+          <!-- Çıktı 1: Canvas Render -->
+          <canvas id="asciiCanvas"></canvas>
+
+          <!-- Çıktı 2: Ham Text Render (<pre>) -->
+          <pre id="asciiPre" style="display: none;"></pre>
+
+          <!-- Orijinal Video PIP Önizleme -->
+          <div class="pip-container" id="pipContainer">
+            <div class="pip-bar">
+              <span>Orijinal Video</span>
+              <button id="closePipBtn" title="Kapat">✕</button>
+            </div>
+            <video id="sourceVideo" playsinline loop crossorigin="anonymous"></video>
+          </div>
+        </div>
+
+        <!-- OYNATICI KONTROL ÇUBUĞU -->
+        <div class="player-bar">
+          <!-- İlerleme Çubuğu -->
+          <div class="scrub-container">
+            <input type="range" id="progressBar" min="0" max="100" value="0" step="0.1">
+            <div class="time-label">
+              <span id="currentTime">00:00</span>
+              <span class="time-divider">/</span>
+              <span id="totalTime">00:00</span>
+            </div>
+          </div>
+
+          <!-- Kontroller -->
+          <div class="controls-container">
+            <div class="controls-left">
+              <button class="btn-player" id="playPauseBtn" title="Oynat / Duraklat">
+                <span id="playIcon">▶</span>
+              </button>
+              <button class="btn-player" id="stopBtn" title="Başa Dön ve Durdur">
+                <span>⏹</span>
+              </button>
+              <button class="btn-player" id="loopBtn" title="Döngü (Açık)" data-active="true">
+                <span>↺</span>
+              </button>
+              <div class="volume-wrapper">
+                <button class="btn-player btn-player-subtle" id="muteBtn" title="Sesi Aç/Kapat">
+                  <span id="volIcon">🔊</span>
+                </button>
+                <input type="range" id="volumeSlider" min="0" max="1" step="0.05" value="0.8">
+              </div>
+            </div>
+
+            <div class="controls-right">
+              <div class="speed-control">
+                <label for="speedSelect">Hız:</label>
+                <select id="speedSelect" class="custom-select select-sm">
+                  <option value="0.5">0.5x</option>
+                  <option value="1" selected>1.0x</option>
+                  <option value="1.5">1.5x</option>
+                  <option value="2">2.0x</option>
+                </select>
+              </div>
+              <span class="dimension-pill" id="dimBadge">120 × 60</span>
+            </div>
+          </div>
+        </div>
+      </section>
+    </main>
+
+    <!-- ALT BİLGİ -->
+    <footer class="app-footer">
+      <span>ascii.video — Saf Web Tabanlı Video Dönüştürücü</span>
+      <a href="#" id="resetDefaultsBtn">Varsayılan Ayarlara Dön</a>
+    </footer>
+  </div>
+
+  <!-- İşleme İçin Görünmez Canvas -->
+  <canvas id="offscreenCanvas" style="display: none;"></canvas>
+
+  <script src="app.js"></script>
+</body>
+</html>
